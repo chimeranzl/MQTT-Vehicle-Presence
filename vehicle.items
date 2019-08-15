@@ -1,0 +1,4 @@
+/* VEHICLE PRESENCE */
+Number          swVehicleFordStatus              "Ford Ranger Status PROXY"                                   { mqtt="<[mqttbroker:openhab/vehicle/ford/status:state:default]" }
+Switch          swVehicleFordHomeOrAway          "Ford Ranger HomeOrAway PROXY"                               { mqtt="<[mqttbroker:openhab/vehicle/ford/homeoraway:state:ON:1], <[mqttbroker:openhab/vehicle/ford/homeoraway:state:OFF:0]" }
+String          s_VehicleFordRanger              "Ford Ranger [%s]"
