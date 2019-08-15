@@ -1,0 +1,62 @@
+//
+// Vehicle Presence Rules
+//
+
+rule "Vehicle STATUS (LWT) changed"
+when 
+	Item swVehicleFordStatus received update
+then
+	// Get LWT status - if receiving updates, then it must be home
+	if (swVehicleFordStatus.state == 1)
+	{
+		logInfo("vehicle", "Ford Ranger is HOME (LWT)")
+		s_VehicleFordRanger.postUpdate("Home")
+	}
+	else if (swVehicleFordStatus.state == 0)	// LWT = off
+	{
+		// If LWT = OFF and Last HomeorAway Message = OFF - it's likely AWAY
+		if (swVehicleFordHomeOrAway.state == OFF)
+		{
+			logInfo("vehicle", "Ford Ranger is AWAY")
+			s_VehicleFordRanger.postUpdate("Away")
+		}
+		else
+		{
+			// Likely still home - but don't update that it is
+			logInfo("vehicle", "LWT - AWAY received, but last STATE says we're HOME")
+		}
+
+	}
+	// If LWT is off (no wifi) does not nessarily mean car is away
+	// Could be that ignition is switched off
+	
+end
+
+
+
+
+rule "Vehicle HOME or AWAY state changed"
+when 
+	Item swVehicleFordHomeOrAway changed
+then
+	// Get state from vehicle
+	if (swVehicleFordHomeOrAway.state == ON)
+	{
+		logInfo("vehicle", "Ford Ranger is HOME")
+		s_VehicleFordRanger.postUpdate("Home")
+	}
+	else if (swVehicleFordHomeOrAway.state == OFF)
+	{
+		// Check LWT status as well - if it's off then it's likely away
+		if (swVehicleFordStatus.state == 0)
+		{
+			logInfo("vehicle", "Ford Ranger is AWAY")
+			s_VehicleFordRanger.postUpdate("Away")
+		}
+		else
+		{
+			// Likely home, as LWT overrides state
+			logInfo("vehicle", "STATE - AWAY received, but LWT says we're home")
+		}
+	}
+end
