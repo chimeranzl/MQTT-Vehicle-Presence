@@ -27,9 +27,9 @@ const String OPENHABVEHICLESTATE = cs_MQTTPrefix + cs_VehicleID + "/homeoraway";
 // Milliseconds to wait between signal strength tests
 unsigned long cl_SampleDelayMillis = 500;
 // Number of samples to take every 'SampleDelayMillis' (before making a decision)
-const int ci_SamplesToTake = 5;
+const int ci_SamplesToTake = 4;
 // Buffer added to baseline to qualify for making better "leaving" or "arriving" decisions
-const int ci_RSSIBuffer = 5;
+const int ci_RSSIBuffer = 7;
 // Send alive every (LWT)
 const int ci_SendAliveEvery = 10;
 
@@ -128,14 +128,14 @@ void ConnectWIFI()
     WiFi.disconnect();
     WiFi.begin(cs_SSID, cs_wifi_Password);
 
-    // If not WiFi connected, retry every 1 second for 1 minute
+    // If not WiFi connected, retry every 100ms for 2 minutes
     while (WiFi.status() != WL_CONNECTED)
     {
       iTries++;
       Serial.print(".");
-      delay(500);
+      delay(200);
 
-      // If can't get to Wifi for 5 minute, reboot ESP
+      // If can't get to Wifi for 2 minutes, reboot ESP
       if (iTries > 600)
       {
         Serial.println("TOO MANY WIFI ATTEMPTS, REBOOTING!");
@@ -151,7 +151,7 @@ void ConnectWIFI()
     digitalWrite(LED_BUILTIN, LOW);
 
     // Let network have a chance to start up
-    delay(500);
+    delay(200);
 
   }
 
@@ -170,12 +170,13 @@ void ConnectMQTT()
   while (mqttClient.connect(cs_VehicleID.c_str(), OPENHABSTATUS.c_str(), 0, 0, "0") != 1)
   {
 
+    // Flash LED (effectively adds a small delay between retries as well)
     Serial.println("Error connecting to MQTT (State:" + String(mqttClient.state()) + ")");
-    for (int iPos = 1; iPos <= 10; iPos++)
+    for (int iPos = 1; iPos <= 5; iPos++)
     {
       // Flash pin
       digitalWrite(LED_BUILTIN, LOW);
-      delay(75);
+      delay(50);
       digitalWrite(LED_BUILTIN, HIGH);
       Serial.print(".");
     }
@@ -219,13 +220,13 @@ void PublishMQTTMessage(String sMQTTSub, String sMQTTData)
     mqttClient.publish(mqtt_topic, message_buff);
 
     // Flash LED twice to indicate sending MQTT data
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(150);
     digitalWrite(LED_BUILTIN, LOW);
-    delay(150);
+    delay(100);
     digitalWrite(LED_BUILTIN, HIGH);
-    delay(150);
+    delay(100);
     digitalWrite(LED_BUILTIN, LOW);
+    delay(100);
+    digitalWrite(LED_BUILTIN, HIGH);
   }
 
 }
