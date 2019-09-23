@@ -29,7 +29,7 @@ unsigned long cl_SampleDelayMillis = 500;
 // Number of samples to take every 'SampleDelayMillis' (before making a decision)
 const int ci_SamplesToTake = 4;
 // Buffer added to baseline to qualify for making better "leaving" or "arriving" decisions
-const int ci_RSSIBuffer = 7;
+const int ci_RSSIBuffer = 8;
 // Send alive every (LWT)
 const int ci_SendAliveEvery = 10;
 
